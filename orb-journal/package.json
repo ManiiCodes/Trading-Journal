@@ -1,0 +1,17 @@
+{
+  "name": "orb-journal",
+  "version": "1.0.0",
+  "private": true,
+  "description": "ORB futures trade journal with sign-in and Tradovate sync",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node --env-file-if-exists=.env --disable-warning=ExperimentalWarning src/server.js",
+    "dev": "node --env-file-if-exists=.env --watch --disable-warning=ExperimentalWarning src/server.js"
+  },
+  "engines": {
+    "node": ">=22.13"
+  },
+  "dependencies": {
+    "express": "^4.21.2"
+  }
+}

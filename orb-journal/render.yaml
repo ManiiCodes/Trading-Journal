@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: orb-journal
+    runtime: node
+    plan: starter          # persistent disks need a paid instance
+    buildCommand: npm ci --omit=dev
+    startCommand: npm start
+    healthCheckPath: /healthz
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: DATA_DIR
+        value: /var/data
+      - key: APP_SECRET
+        generateValue: true
+      - key: ALLOW_SIGNUPS
+        value: "true"
+      - key: TRADOVATE_CLIENT_ID
+        sync: false
+      - key: TRADOVATE_CLIENT_SECRET
+        sync: false
+    disk:
+      name: journal-data
+      mountPath: /var/data
+      sizeGB: 1

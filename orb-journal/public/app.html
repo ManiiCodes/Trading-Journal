@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ORB trade journal</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📒</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/styles.css">
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>ORB trade journal</h1>
+      <div class="who" style="margin-top:8px"><span id="whoEmail"></span><button class="linkbtn" id="logoutBtn" type="button">Sign out</button></div>
+    </div>
+    <div class="pulse" aria-live="polite">
+      <div>Today<b id="pToday">$0</b></div>
+      <div>This week<b id="pWeek">$0</b></div>
+      <div>All time<b id="pAll">$0</b></div>
+    </div>
+  </header>
+
+  <nav role="tablist">
+    <button role="tab" data-tab="log" aria-selected="true">Log a trade</button>
+    <button role="tab" data-tab="journal" aria-selected="false">Journal <span class="badge review" id="reviewCount" hidden></span></button>
+    <button role="tab" data-tab="stats" aria-selected="false">Stats</button>
+    <button role="tab" data-tab="accounts" aria-selected="false">Accounts &amp; Tradovate</button>
+  </nav>
+
+  <div id="banner" class="banner" hidden></div>
+
+  <!-- LOG -->
+  <section class="panel on" id="tab-log">
+    <div class="log">
+      <form class="sheet" id="tradeForm" autocomplete="off">
+        <h2 id="formTitle">New trade</h2>
+        <div id="fillsBox" hidden>
+          <p class="hint" style="margin-top:0">Price, size and accounts come from your Tradovate fills. Add your OR levels, stop and review below.</p>
+          <div class="tablewrap" style="margin:8px 0 4px"><table class="fills"><thead><tr><th>Account</th><th>Symbol</th><th class="num">Qty</th><th class="num">Entry</th><th class="num">Exit</th><th class="num">Fees</th><th class="num">Net</th></tr></thead><tbody id="fillsBody"></tbody></table></div>
+        </div>
+        <div class="grid">
+          <label>Date<input type="date" id="f_date" required></label>
+          <label>Entry time<input type="time" id="f_time"></label>
+          <label>Instrument<select id="f_instr"></select></label>
+          <label>Contracts / acct<input type="number" id="f_qty" min="1" step="1" value="1"></label>
+        </div>
+        <h3>Direction</h3>
+        <div class="seg" id="f_side">
+          <button type="button" data-v="long" class="long">Long</button>
+          <button type="button" data-v="short" class="short">Short</button>
+        </div>
+
+        <h3>Opening range (first 15 min)</h3>
+        <div class="grid">
+          <label>OR high<input type="number" step="0.25" id="f_orh" inputmode="decimal"></label>
+          <label>OR low<input type="number" step="0.25" id="f_orl" inputmode="decimal"></label>
+          <label>Range size<input id="f_orsize" disabled></label>
+        </div>
+
+        <h3>Execution</h3>
+        <div class="grid">
+          <label>Entry<input type="number" step="0.25" id="f_entry" inputmode="decimal"></label>
+          <label>Stop<input type="number" step="0.25" id="f_stop" inputmode="decimal"></label>
+          <label>Target<input type="number" step="0.25" id="f_target" inputmode="decimal"></label>
+          <label>Exit<input type="number" step="0.25" id="f_exit" inputmode="decimal"></label>
+        </div>
+
+        <h3>Confluence before entry</h3>
+        <div class="checks">
+          <label><input type="checkbox" id="f_c15"> 15m candle closed outside OR</label>
+          <label><input type="checkbox" id="f_c5"> 5m confirmed</label>
+          <label><input type="checkbox" id="f_c1"> 1m confirmed</label>
+          <label><input type="checkbox" id="f_plan"> Followed my plan</label>
+        </div>
+
+        <h3>Setup grade</h3>
+        <div class="seg" id="f_grade">
+          <button type="button" data-v="A" class="neutral">A</button>
+          <button type="button" data-v="B" class="neutral">B</button>
+          <button type="button" data-v="C" class="neutral">C</button>
+        </div>
+
+        <div id="acctBlock">
+          <h3>Accounts this trade ran on</h3>
+          <div class="chips" id="f_accts"></div>
+          <p class="hint" id="acctHint"></p>
+        </div>
+
+        <h3>Mistakes</h3>
+        <div class="chips" id="f_mistakes"></div>
+
+        <h3>State of mind</h3>
+        <div class="chips" id="f_emotion"></div>
+
+        <h3>Notes</h3>
+        <div class="grid" style="grid-template-columns:1fr">
+          <label>What happened, what you'd repeat or change<textarea id="f_notes"></textarea></label>
+          <label>Chart link (TradingView snapshot)<input type="url" id="f_link" placeholder="https://www.tradingview.com/x/..."></label>
+        </div>
+
+        <div class="actions">
+          <button class="btn" type="submit" id="saveBtn">Save trade</button>
+          <button class="btn ghost" type="button" id="resetBtn">Clear form</button>
+          <button class="btn danger" type="button" id="deleteBtn" hidden>Delete trade</button>
+        </div>
+      </form>
+
+      <aside class="ticket" aria-label="Trade ticket preview">
+        <h2 style="font-size:15px">Ticket</h2>
+        <svg id="ticketSvg" viewBox="0 0 220 260" role="img" aria-label="Opening range with entry, stop, target and exit"></svg>
+        <div class="result">
+          <div>Points<b id="r_pts">–</b></div>
+          <div>R multiple<b id="r_r">–</b></div>
+          <div>Net / account<b id="r_net">–</b></div>
+          <div>Net all accounts<b id="r_tot">–</b></div>
+        </div>
+        <p class="hint" id="r_fee"></p>
+      </aside>
+    </div>
+  </section>
+
+  <!-- JOURNAL -->
+  <section class="panel" id="tab-journal">
+    <div class="filters">
+      <label>Account<select id="j_acct"></select></label>
+      <label>Show<select id="j_show"><option value="">All trades</option><option value="review">Needs review</option></select></label>
+      <label>From<input type="date" id="j_from"></label>
+      <label>To<input type="date" id="j_to"></label>
+      <div style="display:flex;align-items:flex-end;gap:8px">
+        <button class="btn ghost small" id="exportBtn" type="button">Export CSV</button>
+      </div>
+    </div>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>Date</th><th>Time</th><th>Instr</th><th>Side</th><th class="num">Qty</th><th class="num">Entry</th><th class="num">Exit</th><th class="num">Pts</th><th class="num">R</th><th class="num">Net / acct</th><th class="num">Accts</th><th>Grade</th><th>Tags</th></tr></thead>
+        <tbody id="j_body"></tbody>
+      </table>
+    </div>
+    <p class="note">Tap a trade to edit it. Synced and imported trades show "Needs review" until you save your notes on them.</p>
+  </section>
+
+  <!-- STATS -->
+  <section class="panel" id="tab-stats">
+    <div class="filters">
+      <label>Account<select id="s_acct"></select></label>
+      <label>Range<select id="s_range">
+        <option value="all">All time</option><option value="30">Last 30 days</option><option value="7">Last 7 days</option><option value="month">This month</option>
+      </select></label>
+      <label>P&amp;L basis<select id="s_basis">
+        <option value="per">Per account (strategy edge)</option><option value="total">Combined across copied accounts</option>
+      </select></label>
+    </div>
+    <div class="kpis" id="kpis"></div>
+    <div class="two">
+      <div class="sheet"><h2>Equity curve</h2><svg id="equity" viewBox="0 0 600 220" role="img" aria-label="Cumulative P&L by day"></svg></div>
+      <div class="sheet">
+        <div class="calhead"><h2 style="margin:0" id="calTitle"></h2>
+          <div style="display:flex;gap:6px"><button class="btn ghost small" id="calPrev" type="button" aria-label="Previous month">‹</button><button class="btn ghost small" id="calNext" type="button" aria-label="Next month">›</button></div></div>
+        <div class="cal" id="cal"></div>
+      </div>
+    </div>
+    <div class="two">
+      <div class="sheet"><h2>Does the process pay?</h2><table class="cmp" id="edge"></table></div>
+      <div class="sheet"><h2>By weekday</h2><svg id="dow" viewBox="0 0 600 200" role="img" aria-label="Net P&L by weekday"></svg>
+        <h2 style="margin-top:14px">Costliest mistakes</h2><table class="cmp" id="mistakeTbl"></table></div>
+    </div>
+  </section>
+
+  <!-- ACCOUNTS -->
+  <section class="panel" id="tab-accounts">
+    <div class="stack">
+      <div class="sheet">
+        <h2>Tradovate</h2>
+        <div id="connList"></div>
+        <div class="connect">
+          <div class="opt">
+            <b>Connect with Tradovate sign-in</b>
+            <p id="oauthNote">Use this for prop firm accounts (Tradeify, Lucid, Purdia). You sign in on Tradovate with the credentials your prop firm gave you.</p>
+            <div class="grid" style="grid-template-columns:1fr">
+              <label>Account type<select id="oauthEnv"><option value="demo">Prop firm / eval / sim accounts</option><option value="live">Live brokerage account</option></select></label>
+              <label>Label<input id="oauthLabel" placeholder="e.g. Tradeify accounts" maxlength="60"></label>
+            </div>
+            <div class="actions" style="margin-top:12px"><button class="btn" id="oauthBtn" type="button">Connect Tradovate</button></div>
+          </div>
+          <div class="opt">
+            <b>Import a Tradovate CSV</b>
+            <p>Works for every account today. In Tradovate open Reports, then Performance, choose the account and date range, and download CSV. Times are read in your journal timezone.</p>
+            <div class="grid" style="grid-template-columns:1fr">
+              <label>Account this file belongs to<select id="csvAcct"></select></label>
+              <label>File<input type="file" id="csvFile" accept=".csv,text/csv"></label>
+            </div>
+            <div class="actions" style="margin-top:12px"><button class="btn" id="csvBtn" type="button">Import trades</button></div>
+          </div>
+        </div>
+        <details>
+          <summary>Connect with an API key (personal live account only)</summary>
+          <p class="note">Tradovate only issues API keys on a live, funded brokerage account with the API Access add-on. Prop firm and evaluation accounts can't use this; use the sign-in option or CSV import for those. Your password and secret are encrypted on the server.</p>
+          <div class="grid" style="margin-top:10px">
+            <label>Environment<select id="ak_env"><option value="live">Live</option><option value="demo">Demo</option></select></label>
+            <label>Label<input id="ak_label" maxlength="60" placeholder="Personal account"></label>
+            <label>Tradovate username<input id="ak_name" autocomplete="off"></label>
+            <label>Password<input id="ak_pass" type="password" autocomplete="new-password"></label>
+            <label>CID<input id="ak_cid" inputmode="numeric"></label>
+            <label>Secret<input id="ak_sec" type="password" autocomplete="off"></label>
+          </div>
+          <div class="actions"><button class="btn" id="akBtn" type="button">Connect and sync</button></div>
+        </details>
+      </div>
+
+      <div class="sheet">
+        <h2>Accounts</h2>
+        <p class="note" style="margin-top:0">Tradovate accounts appear here after the first sync. Name them and set the firm and type so filters and stats read clearly. Add accounts by hand for anything you log manually.</p>
+        <div id="acctList"></div>
+        <div class="actions"><button class="btn ghost" id="addAcct" type="button">Add account</button></div>
+      </div>
+
+      <div class="sheet">
+        <h2>Commissions &amp; settings</h2>
+        <p class="note" style="margin-top:0">Round-trip cost per contract. Used for manual trades, CSV imports, and synced fills when Tradovate doesn't report fees.</p>
+        <div class="grid" id="feeGrid"></div>
+        <h3>Defaults</h3>
+        <div class="grid">
+          <label>Default instrument<select id="defInstr"></select></label>
+          <label>Timezone<select id="tzSel"></select></label>
+          <label>Theme<select id="theme"><option value="">Match device</option><option value="light">Light</option><option value="dark">Dark</option></select></label>
+        </div>
+        <div class="actions"><button class="btn" id="saveSettings" type="button">Save settings</button></div>
+      </div>
+    </div>
+  </section>
+</div>
+<div id="toast" role="status"></div>
+<script src="/assets/app.js"></script>
+</body>
+</html>

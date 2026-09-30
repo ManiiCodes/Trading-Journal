@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sign in · ORB trade journal</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📒</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/styles.css">
+</head>
+<body>
+<main class="auth">
+  <div class="authcard sheet">
+    <h1>ORB trade journal</h1>
+    <p class="lede" id="lede">Sign in to your journal.</p>
+    <form id="authForm" novalidate>
+      <label>Email<input type="email" id="email" autocomplete="email" required></label>
+      <label>Password<input type="password" id="password" autocomplete="current-password" required minlength="10"></label>
+      <p class="formerr" id="err" role="alert"></p>
+      <button class="btn" type="submit" id="submitBtn">Sign in</button>
+    </form>
+    <p class="switch" id="switchRow"><span id="switchText">New here?</span> <button class="linkbtn" type="button" id="switchBtn">Create an account</button></p>
+  </div>
+</main>
+<script src="/assets/login.js"></script>
+</body>
+</html>
